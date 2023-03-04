@@ -1,13 +1,13 @@
-package com.sigmamales.serverservice;
+package com.sigmamales.sigmafoodserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServerServiceApplication {
+public class SigmaFoodServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ServerServiceApplication.class, args);
+        SpringApplication.run(SigmaFoodServerApplication.class, args);
     }
 
 }
