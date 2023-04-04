@@ -3,3 +3,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgrespw
+  jpa:
+    properties:
+      hibernate:
+        default_schema: public
+
+authentication:
+  public-key: classpath:public.key
+  private-key: classpath:private.key
+  token-expiration-time-hours: 1
