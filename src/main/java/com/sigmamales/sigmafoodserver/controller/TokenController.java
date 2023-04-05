@@ -1,59 +1,23 @@
-/*
- * Copyright 2020-2021 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.sigmamales.sigmafoodserver.controller;
 
-import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
-import com.sigmamales.sigmafoodserver.model.User;
-import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
+import com.sigmamales.sigmafoodserver.service.TokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/token")
+@RequestMapping(TokenController.BASE_PATH)
 public class TokenController {
 
-	private final JwtEncoder jwtEncoder;
+	public static final String BASE_PATH = "/token";
 
-	private static final String ISSUER_CLAIM = "SigmaFoodServer";
-
-	private final AuthenticationProperties authenticationProperties;
+	private final TokenService tokenService;
 
 	@PostMapping
 	public String createToken() {
-		var instantNow = Instant.now();
-		JwtClaimsSet claims = JwtClaimsSet.builder()
-				.issuer(ISSUER_CLAIM)
-				.issuedAt(instantNow)
-				.expiresAt(instantNow.plus(authenticationProperties.getTokenExpirationTimeHours(), ChronoUnit.HOURS))
-				.subject(PrincipalContext.getCurrentUserId().toString())
-				.build();
-		return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+		return tokenService.createToken();
 	}
 
 }
