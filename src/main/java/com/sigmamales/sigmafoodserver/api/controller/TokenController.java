@@ -1,4 +1,4 @@
-package com.sigmamales.sigmafoodserver.controller;
+package com.sigmamales.sigmafoodserver.api.controller;
 
 import com.sigmamales.sigmafoodserver.service.TokenService;
 import lombok.RequiredArgsConstructor;

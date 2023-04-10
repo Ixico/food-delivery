@@ -3,7 +3,7 @@ package com.sigmamales.sigmafoodserver.authentication;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.sigmamales.sigmafoodserver.controller.TokenController;
+import com.sigmamales.sigmafoodserver.api.controller.TokenController;
 import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +31,8 @@ public class AuthenticationConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/swagger-ui/index.html")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf((csrf) -> csrf.ignoringRequestMatchers(TokenController.BASE_PATH))

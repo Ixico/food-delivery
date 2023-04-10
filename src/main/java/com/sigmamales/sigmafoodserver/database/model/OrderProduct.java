@@ -1,4 +1,4 @@
-package com.sigmamales.sigmafoodserver.model;
+package com.sigmamales.sigmafoodserver.database.model;
 
 
 import jakarta.persistence.*;
@@ -29,5 +29,7 @@ public class OrderProduct {
     @NotNull
     private Product product;
 
+    @NotNull
+    private Integer quantity;
 
 }
