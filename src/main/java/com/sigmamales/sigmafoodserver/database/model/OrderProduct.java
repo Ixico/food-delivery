@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +23,7 @@ public class OrderProduct {
     @ManyToOne
     @JoinColumn(name = "order_id")
     @NotNull
+    @ToString.Exclude
     private Order order;
 
     @ManyToOne
