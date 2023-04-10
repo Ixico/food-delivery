@@ -69,4 +69,8 @@ public class OrderService {
                         .multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public List<Order> getAllUserOrders(@NotNull User user) {
+        return orderRepository.findAllByUser(user);
+    }
 }

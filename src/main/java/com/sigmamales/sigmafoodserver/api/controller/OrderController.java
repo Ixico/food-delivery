@@ -9,10 +9,10 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,4 +36,9 @@ public class OrderController {
         );
     }
 
+    @GetMapping
+    public List<OrderDto> getAllUserOrders() {
+        return orderService.getAllUserOrders(userService.getCurrentUser()).stream()
+                .map(orderMapper::toDto).collect(Collectors.toList());
+    }
 }
