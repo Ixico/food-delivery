@@ -31,6 +31,12 @@ public class Order {
     @NotNull
     private BigDecimal totalPrice;
 
+    @NotNull
+    private BigDecimal productsCost;
+
+    @NotNull
+    private BigDecimal deliveryCost;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @NotNull

@@ -1,8 +1,10 @@
 package com.sigmamales.sigmafoodserver.api.controller;
 
 import com.sigmamales.sigmafoodserver.api.dto.OrderDto;
+import com.sigmamales.sigmafoodserver.api.dto.OrderSummaryDto;
 import com.sigmamales.sigmafoodserver.api.mapper.OrderMapper;
 import com.sigmamales.sigmafoodserver.api.request.OrderRequest;
+import com.sigmamales.sigmafoodserver.api.request.OrderSummaryRequest;
 import com.sigmamales.sigmafoodserver.service.OrderService;
 import com.sigmamales.sigmafoodserver.service.UserService;
 import jakarta.transaction.Transactional;
@@ -40,5 +42,10 @@ public class OrderController {
     public List<OrderDto> getAllUserOrders() {
         return orderService.getAllUserOrders(userService.getCurrentUser()).stream()
                 .map(orderMapper::toDto).collect(Collectors.toList());
+    }
+
+    @PostMapping("/summary")
+    public OrderSummaryDto summaryOrder(@NotNull @Valid @RequestBody OrderSummaryRequest orderSummaryRequest) {
+        return orderService.summaryOrder(orderSummaryRequest);
     }
 }
