@@ -2,13 +2,14 @@ package com.sigmamales.sigmafoodserver.api.controller;
 
 import com.sigmamales.sigmafoodserver.api.dto.AddressDto;
 import com.sigmamales.sigmafoodserver.api.mapper.AddressMapper;
+import com.sigmamales.sigmafoodserver.api.request.AddressRequest;
 import com.sigmamales.sigmafoodserver.service.AddressService;
 import com.sigmamales.sigmafoodserver.service.UserService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,5 +29,12 @@ public class AddressController {
     @GetMapping
     public AddressDto getUserAddress() {
         return addressMapper.toDto(addressService.getUserAddress(userService.getCurrentUser()));
+    }
+
+    @PutMapping
+    public AddressDto updateUserAddress(@NotNull @Valid @RequestBody AddressRequest addressRequest) {
+        return addressMapper.toDto(
+                addressService.updateUserAddress(addressRequest, userService.getCurrentUser())
+        );
     }
 }
