@@ -45,7 +45,7 @@ public class OrderController {
     }
 
     @PostMapping("/summary")
-    public OrderSummaryDto summaryOrder(@NotNull @Valid @RequestBody OrderSummaryRequest orderSummaryRequest) {
-        return orderService.summaryOrder(orderSummaryRequest);
+    public OrderSummaryDto orderSummary(@NotNull @Valid @RequestBody OrderSummaryRequest orderSummaryRequest) {
+        return orderService.orderSummary(orderSummaryRequest);
     }
 }

@@ -16,4 +16,4 @@ authentication:
   token-expiration-time-hours: 1
 logging:
   level:
-    root: debug
+    com.sigmamales.sigmafoodserver: debug

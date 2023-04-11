@@ -36,6 +36,7 @@ public class OrderService {
 
     private final AddressRepository addressRepository;
 
+    private static final BigDecimal DELIVERY_COST = BigDecimal.TEN;
 
     public Order createOrder(@NotNull @Valid OrderRequest orderRequest, @NotNull User user) {
         var addressRequest = orderRequest.getAddressRequest();
@@ -50,7 +51,6 @@ public class OrderService {
                 .creationDate(Instant.now())
                 .user(user)
                 .address(address)
-                .deliveryCost(BigDecimal.TEN)
                 .build();
         var orderProducts = orderRequest.getOrderProductRequests().stream().map(request ->
                 OrderProduct.builder()
@@ -59,37 +59,39 @@ public class OrderService {
                         .quantity(request.getQuantity())
                         .build()
         ).collect(Collectors.toList());
-        order.setProductsCost(calculateProductsCost(orderProducts));
-        order.setTotalPrice(order.getProductsCost().add(order.getDeliveryCost()));
+        var orderSummary = summarizeOrder(orderProducts);
+        order.setProductsCost(orderSummary.getProductsCost());
+        order.setDeliveryCost(orderSummary.getDeliveryCost());
+        order.setTotalPrice(orderSummary.getTotalPrice());
         var savedOrder = orderRepository.save(order);
         savedOrder.setOrderProducts(orderProductRepository.saveAll(orderProducts));
         log.debug("Created order: {}", savedOrder);
         return savedOrder;
     }
 
-    private BigDecimal calculateProductsCost(@NotNull List<OrderProduct> orderProducts) {
-        return orderProducts.stream()
-                .map(orderProduct -> orderProduct.getProduct().getPrice()
-                        .multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public List<Order> getAllUserOrders(@NotNull User user) {
         return orderRepository.findAllByUser(user);
     }
 
-    public OrderSummaryDto summaryOrder(OrderSummaryRequest orderSummaryRequest) {
+    public OrderSummaryDto orderSummary(@NotNull @Valid OrderSummaryRequest orderSummaryRequest) {
         var orderProducts = orderSummaryRequest.getOrderProductRequests().stream().map(request ->
                 OrderProduct.builder()
                         .product(productRepository.getById(request.getProductId()))
                         .quantity(request.getQuantity())
                         .build()
         ).collect(Collectors.toList());
-        var productsCost = calculateProductsCost(orderProducts);
+        return summarizeOrder(orderProducts);
+    }
+
+    private OrderSummaryDto summarizeOrder(@NotNull List<OrderProduct> orderProducts) {
+        var productsCost = orderProducts.stream()
+                .map(orderProduct -> orderProduct.getProduct().getPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getQuantity()))
+                ).reduce(BigDecimal.ZERO, BigDecimal::add);
         return OrderSummaryDto.builder()
-                .productsCost(calculateProductsCost(orderProducts))
-                .deliveryCost(BigDecimal.TEN)
-                .totalPrice(BigDecimal.TEN.add(productsCost))
+                .productsCost(productsCost)
+                .deliveryCost(DELIVERY_COST)
+                .totalPrice(productsCost.add(DELIVERY_COST))
                 .build();
     }
 }
