@@ -1,6 +1,8 @@
 package com.sigmamales.sigmafoodserver.service;
 
+import com.sigmamales.sigmafoodserver.api.request.UserRequest;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
+import com.sigmamales.sigmafoodserver.database.model.Address;
 import com.sigmamales.sigmafoodserver.database.model.User;
 import com.sigmamales.sigmafoodserver.database.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -31,4 +33,13 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(Strings.EMPTY));
     }
 
+    public Address getUserAddress() {
+        return getCurrentUser().getAddress();
+    }
+
+    public User updateUserData(UserRequest userRequest) {
+        var currentUser = getCurrentUser();
+        currentUser.updateWith(userRequest);
+        return currentUser;
+    }
 }

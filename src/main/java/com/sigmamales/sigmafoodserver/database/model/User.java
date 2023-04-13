@@ -1,8 +1,12 @@
 package com.sigmamales.sigmafoodserver.database.model;
 
+import com.sigmamales.sigmafoodserver.api.request.UserRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -31,9 +35,27 @@ public class User implements UserDetails {
     @NotBlank
     private String password;
 
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    private String surname;
+
+    @NotBlank
+    private String phoneNumber;
+
     @OneToOne
     @JoinColumn(name = "address_id")
+    @Cascade(CascadeType.ALL)
     private Address address;
+
+
+    public void updateWith(@NotNull UserRequest request) {
+        name = request.getName();
+        surname = request.getSurname();
+        phoneNumber = request.getPhoneNumber();
+        address.updateWith(request.getAddress());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
