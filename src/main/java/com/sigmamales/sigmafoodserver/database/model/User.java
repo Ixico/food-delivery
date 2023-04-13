@@ -49,6 +49,12 @@ public class User implements UserDetails {
     @Cascade(CascadeType.ALL)
     private Address address;
 
+    @NotNull
+    private Boolean enabled;
+
+    @OneToOne(mappedBy = "user")
+    @Cascade(CascadeType.ALL)
+    private ActivationToken activationToken;
 
     public void updateWith(@NotNull UserRequest request) {
         name = request.getName();
@@ -89,6 +95,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

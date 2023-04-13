@@ -20,4 +20,6 @@ public interface UserRepository extends CommonRepository<User> {
 
     Optional<User> findByEmail(@NotBlank String email);
 
+    boolean existsByEmail(@NotBlank String email);
+
 }
