@@ -3,6 +3,7 @@ package com.sigmamales.sigmafoodserver.authentication;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.sigmamales.sigmafoodserver.api.controller.AccountController;
 import com.sigmamales.sigmafoodserver.api.controller.TokenController;
 import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,10 @@ public class AuthenticationConfiguration {
     public SecurityFilterChain securityFilterChainToken(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers(AccountController.BASE_PATH).permitAll()
                         .anyRequest().authenticated()
                 )
+                .csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
