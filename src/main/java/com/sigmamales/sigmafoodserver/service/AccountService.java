@@ -5,12 +5,16 @@ import com.sigmamales.sigmafoodserver.api.request.ActivateAccountRequest;
 import com.sigmamales.sigmafoodserver.api.request.CreateAccountRequest;
 import com.sigmamales.sigmafoodserver.database.model.ActivationToken;
 import com.sigmamales.sigmafoodserver.database.model.User;
+import com.sigmamales.sigmafoodserver.database.repository.ActivationTokenRepository;
 import com.sigmamales.sigmafoodserver.database.repository.UserRepository;
+import com.sigmamales.sigmafoodserver.event.RegistrationEvent;
+import com.sigmamales.sigmafoodserver.exception.InvalidActivationToken;
 import com.sigmamales.sigmafoodserver.exception.UserAlreadyExistsException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +32,13 @@ public class AccountService {
 
     private final UserRepository userRepository;
 
+    private final ActivationTokenRepository activationTokenRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     private final AddressMapper addressMapper;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
     public UUID createAccount(CreateAccountRequest request) {
@@ -39,33 +47,43 @@ public class AccountService {
         }
         var userData = request.getUserData();
         var address = addressMapper.toEntity(request.getUserData().getAddress());
-        var user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(userData.getName())
-                .surname(userData.getSurname())
-                .phoneNumber(userData.getPhoneNumber())
-                .address(address)
-                .enabled(false)
-                .build();
-        var activationToken = ActivationToken.builder()
-                .user(user)
-                .token(generateTokenValue())
-                .expiration(Instant.now().plus(10, ChronoUnit.MINUTES))
-                .build();
-        user.setActivationToken(activationToken);
-        return userRepository.save(user).getId();
+        var userId = userRepository.save(
+                User.builder()
+                        .email(request.getEmail())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .name(userData.getName())
+                        .surname(userData.getSurname())
+                        .phoneNumber(userData.getPhoneNumber())
+                        .address(address)
+                        .enabled(false)
+                        .build()
+        ).getId();
+        var tokenValue = activationTokenRepository.save(
+                ActivationToken.builder()
+                        .userId(userId)
+                        .token(generateTokenValue())
+                        .expiration(Instant.now().plus(10, ChronoUnit.MINUTES))
+                        .build()
+        ).getToken();
+        applicationEventPublisher.publishEvent(
+                RegistrationEvent.builder()
+                        .email(request.getEmail())
+                        .token(tokenValue)
+                        .build()
+        );
+        return userId;
     }
 
 
-    // TODO: security issues
     public User activateAccount(ActivateAccountRequest request) {
-        var user = userRepository.getById(request.getAccountId());
-        var activationToken = user.getActivationToken();
-        if (activationToken.getToken().equals(request.getToken())) {
-            user.setEnabled(true);
+        var activationTokenExists = activationTokenRepository.existsByUserIdAndTokenAndExpirationAfter(
+                request.getAccountId(), request.getToken(), Instant.now());
+        if (!activationTokenExists) {
+            throw InvalidActivationToken.instance();
         }
-        return null;
+        var user = userRepository.getById(request.getAccountId());
+        user.setEnabled(true);
+        return userRepository.save(user);
     }
 
     private String generateTokenValue() {

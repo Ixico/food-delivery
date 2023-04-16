@@ -1,6 +1,8 @@
 package com.sigmamales.sigmafoodserver.database.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -21,10 +23,8 @@ public class ActivationToken {
     @GeneratedValue
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
     @NotNull
-    private User user;
+    private UUID userId;
 
     @NotBlank
     private String token;

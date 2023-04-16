@@ -7,6 +7,14 @@ spring:
     properties:
       hibernate:
         default_schema: public
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sigmafoodcompany@gmail.com
+    password: ilnxeqwxtovawehz
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 springdoc:
   api-docs:
     path: "/api-docs"
@@ -17,3 +25,6 @@ authentication:
 logging:
   level:
     com.sigmamales.sigmafoodserver: debug
+    org:
+      springframework:
+        security: debug
