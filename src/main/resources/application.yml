@@ -21,7 +21,8 @@ springdoc:
 authentication:
   public-key: classpath:public.key
   private-key: classpath:private.key
-  token-expiration-time-hours: 1
+  access-token-expiration-minutes: 5
+  refresh-token-expiration-hours: 24
 logging:
   level:
     com.sigmamales.sigmafoodserver: debug

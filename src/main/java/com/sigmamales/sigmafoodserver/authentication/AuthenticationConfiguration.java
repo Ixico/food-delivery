@@ -1,21 +1,16 @@
 package com.sigmamales.sigmafoodserver.authentication;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import com.nimbusds.jose.jwk.source.JWKSource;
 import com.sigmamales.sigmafoodserver.api.controller.AccountController;
 import com.sigmamales.sigmafoodserver.api.controller.TokenController;
-import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,11 +28,12 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class AuthenticationConfiguration {
 
-    private final AuthenticationProperties authenticationProperties;
+    private static final String JWT_SIGNING_ALGORITHM = "HmacSHA256";
 
     @Bean
     @Order(1)
-    public SecurityFilterChain securityFilterChainBasic(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChainRefreshTokenAndBasicAuth(
+            HttpSecurity http, @Qualifier("refreshTokenDecoder") JwtDecoder jwtDecoder) throws Exception {
         http
                 .securityMatcher(TokenController.BASE_PATH)
                 .authorizeHttpRequests((authorize) -> authorize
@@ -45,20 +41,28 @@ public class AuthenticationConfiguration {
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
+                .oauth2ResourceServer(customizer -> customizer
+                        .jwt()
+                        .decoder(jwtDecoder)
+                )
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 
     @Bean
     @Order(2)
-    public SecurityFilterChain securityFilterChainToken(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChainAccessToken(
+            HttpSecurity http, @Qualifier("accessTokenDecoder") JwtDecoder jwtDecoder) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AccountController.BASE_PATH).permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .oauth2ResourceServer(customizer -> customizer
+                        .jwt()
+                        .decoder(jwtDecoder)
+                )
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
@@ -69,18 +73,33 @@ public class AuthenticationConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder(SecretKey jwtSecret) {
+    @Bean("refreshTokenDecoder")
+    public JwtDecoder refreshTokenDecoder(@Qualifier("refreshTokenSecret") SecretKey jwtSecret) {
         return NimbusJwtDecoder.withSecretKey(jwtSecret).build();
     }
 
-    @Bean
-    public JwtEncoder jwtEncoder(SecretKey jwtSecret) {
+    @Bean("refreshTokenEncoder")
+    public JwtEncoder refreshTokenEncoder(@Qualifier("refreshTokenSecret") SecretKey jwtSecret) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecret));
     }
 
-    @Bean
-    public SecretKey jwtSecret() throws NoSuchAlgorithmException {
-        return KeyGenerator.getInstance("HmacSHA256").generateKey();
+    @Bean("refreshTokenSecret")
+    public SecretKey refreshTokenSecret() throws NoSuchAlgorithmException {
+        return KeyGenerator.getInstance(JWT_SIGNING_ALGORITHM).generateKey();
+    }
+
+    @Bean("accessTokenDecoder")
+    public JwtDecoder accessTokenDecoder(@Qualifier("accessTokenSecret") SecretKey jwtSecret) {
+        return NimbusJwtDecoder.withSecretKey(jwtSecret).build();
+    }
+
+    @Bean("accessTokenEncoder")
+    public JwtEncoder accessTokenEncoder(@Qualifier("accessTokenSecret") SecretKey jwtSecret) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecret));
+    }
+
+    @Bean("accessTokenSecret")
+    public SecretKey accessTokenSecret() throws NoSuchAlgorithmException {
+        return KeyGenerator.getInstance(JWT_SIGNING_ALGORITHM).generateKey();
     }
 }

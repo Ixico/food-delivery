@@ -1,10 +1,14 @@
 package com.sigmamales.sigmafoodserver.service;
 
+import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
 import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -19,19 +23,30 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class TokenService {
 
-    private final JwtEncoder jwtEncoder;
+    @Qualifier("refreshTokenEncoder")
+    private final JwtEncoder refreshTokenEncoder;
 
-    private final AuthenticationProperties authenticationProperties;
+    @Qualifier("accessTokenEncoder")
+    private final JwtEncoder accessTokenEncoder;
 
-    public String createToken() {
-        var currentUserId = PrincipalContext.getCurrentUserId().toString();
-        log.debug("Issuing token for user with id {}", currentUserId);
+    private final AuthenticationProperties properties;
+
+    public TokenDto createTokens() {
         var instantNow = Instant.now();
-        var claims = JwtClaimsSet.builder()
-                .issuedAt(instantNow)
-                .expiresAt(instantNow.plus(authenticationProperties.getTokenExpirationTimeHours(), ChronoUnit.HOURS))
-                .subject(currentUserId)
+        var refreshTokenExpiration = instantNow.plus(properties.getRefreshTokenExpirationHours(), ChronoUnit.HOURS);
+        var accessTokenExpiration = instantNow.plus(properties.getAccessTokenExpirationMinutes(), ChronoUnit.HOURS);
+        return TokenDto.builder()
+                .refreshToken(refreshTokenEncoder.encode(buildParameters(instantNow, refreshTokenExpiration)).getTokenValue())
+                .accessToken(accessTokenEncoder.encode(buildParameters(instantNow, accessTokenExpiration)).getTokenValue())
                 .build();
-        return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
+    public JwtEncoderParameters buildParameters(Instant issuedAt, Instant expiresAt) {
+        var claims = JwtClaimsSet.builder()
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
+                .subject(PrincipalContext.getCurrentUserId().toString())
+                .build();
+        return JwtEncoderParameters.from(JwsHeader.with(() -> JwsAlgorithms.HS256).build(), claims);
     }
 }

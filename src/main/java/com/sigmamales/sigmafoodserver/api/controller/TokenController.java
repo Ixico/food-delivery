@@ -1,5 +1,6 @@
 package com.sigmamales.sigmafoodserver.api.controller;
 
+import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +17,8 @@ public class TokenController {
 	private final TokenService tokenService;
 
 	@PostMapping
-	public String createToken() {
-		return tokenService.createToken();
+	public TokenDto createTokens() {
+		return tokenService.createTokens();
 	}
 
 }

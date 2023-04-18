@@ -22,5 +22,8 @@ public class AuthenticationProperties {
     private RSAPrivateKey privateKey;
 
     @NotNull
-    private Integer tokenExpirationTimeHours;
+    private Integer accessTokenExpirationMinutes;
+
+    @NotNull
+    private Integer refreshTokenExpirationHours;
 }
