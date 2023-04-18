@@ -3,6 +3,8 @@ package com.sigmamales.sigmafoodserver.authentication;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.jwk.source.JWKSource;
 import com.sigmamales.sigmafoodserver.api.controller.AccountController;
 import com.sigmamales.sigmafoodserver.api.controller.TokenController;
 import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
@@ -22,6 +24,10 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -64,14 +70,17 @@ public class AuthenticationConfiguration {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(authenticationProperties.getPublicKey()).build();
+    public JwtDecoder jwtDecoder(SecretKey jwtSecret) {
+        return NimbusJwtDecoder.withSecretKey(jwtSecret).build();
     }
 
     @Bean
-    public JwtEncoder jwtEncoder() {
-        var rsaKey = new RSAKey.Builder(authenticationProperties.getPublicKey())
-                .privateKey(authenticationProperties.getPrivateKey()).build();
-        return new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(rsaKey)));
+    public JwtEncoder jwtEncoder(SecretKey jwtSecret) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecret));
+    }
+
+    @Bean
+    public SecretKey jwtSecret() throws NoSuchAlgorithmException {
+        return KeyGenerator.getInstance("HmacSHA256").generateKey();
     }
 }
