@@ -4,6 +4,7 @@ import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
 import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,12 +17,18 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class TokenService {
+
+
+    private final Set<String> revokedTokens = Collections.synchronizedSet(new HashSet<>());
 
     @Qualifier("refreshTokenEncoder")
     private final JwtEncoder refreshTokenEncoder;
@@ -30,6 +37,7 @@ public class TokenService {
     private final JwtEncoder accessTokenEncoder;
 
     private final AuthenticationProperties properties;
+
 
     public TokenDto createTokens() {
         var instantNow = Instant.now();
@@ -49,4 +57,14 @@ public class TokenService {
                 .build();
         return JwtEncoderParameters.from(JwsHeader.with(() -> JwsAlgorithms.HS256).build(), claims);
     }
+
+
+    public boolean isRevoked(@NotNull String token) {
+        return revokedTokens.contains(token);
+    }
+
+    public void revokeToken(String token) {
+        revokedTokens.add(token);
+    }
+
 }

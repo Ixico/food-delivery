@@ -2,10 +2,9 @@ package com.sigmamales.sigmafoodserver.api.controller;
 
 import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.service.TokenService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,9 +15,15 @@ public class TokenController {
 
 	private final TokenService tokenService;
 
+
 	@PostMapping
 	public TokenDto createTokens() {
 		return tokenService.createTokens();
+	}
+
+	@DeleteMapping
+	public void revokeToken(@NotBlank @RequestParam String token) {
+		tokenService.revokeToken(token);
 	}
 
 }
