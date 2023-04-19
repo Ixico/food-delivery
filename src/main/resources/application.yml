@@ -28,4 +28,9 @@ logging:
     com.sigmamales.sigmafoodserver: debug
     org:
       springframework:
-        security: debug
+        security: trace
+        web:
+          FilterChainProxy: trace
+password:
+  minimum-length-enabled: true
+  strength-enabled: true

@@ -5,6 +5,7 @@ import com.sigmamales.sigmafoodserver.api.controller.TokenController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
+@ComponentScan("nl._42.password.validation")
 public class AuthenticationConfiguration {
 
     private final RevokedTokenFilter revokedTokenFilter;
@@ -68,5 +70,6 @@ public class AuthenticationConfiguration {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 }

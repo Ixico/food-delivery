@@ -40,11 +40,14 @@ public class AccountService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final ValidationService validationService;
+
 
     public UUID createAccount(CreateAccountRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw UserAlreadyExistsException.withEmail(request.getEmail());
         }
+        validationService.validatePasswordComplexity(request.getPassword());
         var userData = request.getUserData();
         var address = addressMapper.toEntity(request.getUserData().getAddress());
         var userId = userRepository.save(

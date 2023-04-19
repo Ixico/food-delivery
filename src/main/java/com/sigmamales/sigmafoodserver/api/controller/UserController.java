@@ -4,6 +4,7 @@ import com.sigmamales.sigmafoodserver.api.dto.AddressDto;
 import com.sigmamales.sigmafoodserver.api.dto.UserDto;
 import com.sigmamales.sigmafoodserver.api.mapper.AddressMapper;
 import com.sigmamales.sigmafoodserver.api.mapper.UserMapper;
+import com.sigmamales.sigmafoodserver.api.request.ChangePasswordRequest;
 import com.sigmamales.sigmafoodserver.api.request.UserRequest;
 import com.sigmamales.sigmafoodserver.service.UserService;
 import jakarta.transaction.Transactional;
@@ -40,5 +41,10 @@ public class UserController {
     @PutMapping
     public UserDto updateUserData(@NotNull @Valid @RequestBody UserRequest userRequest) {
         return userMapper.toDto(userService.updateUserData(userRequest));
+    }
+
+    @PutMapping("/password")
+    public void changePassword(@NotNull @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        userService.changePassword(changePasswordRequest);
     }
 }
