@@ -11,10 +11,10 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,12 +40,16 @@ public class OrderController {
 
     @GetMapping
     public List<OrderDto> getAllUserOrders() {
-        return orderService.getAllUserOrders(userService.getCurrentUser()).stream()
-                .map(orderMapper::toDto).collect(Collectors.toList());
+        return orderService.getAllUserOrders(userService.getCurrentUser());
     }
 
     @PostMapping("/summary")
     public OrderSummaryDto orderSummary(@NotNull @Valid @RequestBody OrderSummaryRequest orderSummaryRequest) {
         return orderService.orderSummary(orderSummaryRequest);
+    }
+
+    @GetMapping(value = "/xml", produces = MediaType.APPLICATION_XML_VALUE)
+    public String exportAllUserOrders() {
+        return orderService.exportAllUserOrders(userService.getCurrentUser());
     }
 }

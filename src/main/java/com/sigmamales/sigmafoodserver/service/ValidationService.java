@@ -17,6 +17,8 @@ public class ValidationService {
 
     private final PasswordValidator passwordValidator;
 
+    public static final String EMAIL_REGEX = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+
     public void validatePasswordComplexity(@NotBlank String password) {
         try {
             passwordValidator.validate(password, null);

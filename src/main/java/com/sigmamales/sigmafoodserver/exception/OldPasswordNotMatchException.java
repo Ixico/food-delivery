@@ -1,4 +1,4 @@
-package com.sigmamales.sigmafoodserver.api.request;
+package com.sigmamales.sigmafoodserver.exception;
 
 import com.sigmamales.sigmafoodserver.exception.common.ApiException;
 import com.sigmamales.sigmafoodserver.exception.common.ErrorCode;

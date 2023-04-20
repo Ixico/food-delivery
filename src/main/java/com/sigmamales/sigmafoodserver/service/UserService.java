@@ -1,12 +1,12 @@
 package com.sigmamales.sigmafoodserver.service;
 
 import com.sigmamales.sigmafoodserver.api.request.ChangePasswordRequest;
-import com.sigmamales.sigmafoodserver.api.request.OldPasswordNotMatchException;
 import com.sigmamales.sigmafoodserver.api.request.UserRequest;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
 import com.sigmamales.sigmafoodserver.database.model.Address;
 import com.sigmamales.sigmafoodserver.database.model.User;
 import com.sigmamales.sigmafoodserver.database.repository.UserRepository;
+import com.sigmamales.sigmafoodserver.exception.OldPasswordNotMatchException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
