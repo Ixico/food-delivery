@@ -43,10 +43,12 @@ public class TokenService {
         var instantNow = Instant.now();
         var refreshTokenExpiration = instantNow.plus(properties.getRefreshTokenExpirationHours(), ChronoUnit.HOURS);
         var accessTokenExpiration = instantNow.plus(properties.getAccessTokenExpirationMinutes(), ChronoUnit.HOURS);
-        return TokenDto.builder()
+        var tokens = TokenDto.builder()
                 .refreshToken(refreshTokenEncoder.encode(buildParameters(instantNow, refreshTokenExpiration)).getTokenValue())
                 .accessToken(accessTokenEncoder.encode(buildParameters(instantNow, accessTokenExpiration)).getTokenValue())
                 .build();
+        PrincipalContext.getCurrentTokenValue().ifPresent(this::revokeToken);
+        return tokens;
     }
 
     public JwtEncoderParameters buildParameters(Instant issuedAt, Instant expiresAt) {

@@ -5,6 +5,7 @@ import com.sigmamales.sigmafoodserver.exception.UserNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class PrincipalContext {
@@ -19,6 +20,14 @@ public class PrincipalContext {
             return UUID.fromString(((Jwt) principal).getSubject());
         }
         throw UserNotFoundException.instance();
+    }
+
+    public static Optional<String> getCurrentTokenValue() {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof Jwt) {
+            return Optional.of(((Jwt) principal).getTokenValue());
+        }
+        return Optional.empty();
     }
 
 }
