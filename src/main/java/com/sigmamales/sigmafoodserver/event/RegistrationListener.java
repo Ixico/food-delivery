@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,6 +16,7 @@ public class RegistrationListener {
     private final JavaMailSender javaMailSender;
 
     @EventListener
+    @Async
     public void handleRegistrationEvent(RegistrationEvent registrationEvent) {
         var message = new SimpleMailMessage();
         message.setFrom("noreply@sigmafood.com");
