@@ -21,6 +21,8 @@ springdoc:
 application-properties:
   access-token-expiration-minutes: 5
   refresh-token-expiration-hours: 24
+  activation_token_expiration_minutes: 30
+  account_activation_max_attempts: 3
 logging:
   level:
     com.sigmamales.sigmafoodserver: debug

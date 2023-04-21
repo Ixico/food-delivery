@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,6 +20,23 @@ public interface ActivationTokenRepository extends CommonRepository<ActivationTo
         return ActivationTokenNotFoundException.withId(id);
     }
 
-    boolean existsByUserIdAndTokenAndExpirationAfter(@NotNull UUID userId, @NotBlank String token, @NotNull Instant expirationAfter);
+    boolean existsByUserIdAndTokenAndExpirationAfterAndActivationAttemptsLessThan(
+            @NotNull UUID userId, @NotBlank String token,
+            @NotNull Instant expirationAfter, @NotNull Integer activationAttempts
+    );
 
+    default boolean tokenExists(
+            @NotNull UUID userId,
+            @NotBlank String token,
+            @NotNull Instant expirationAfter,
+            @NotNull Integer activationAttempts
+    ) {
+        return existsByUserIdAndTokenAndExpirationAfterAndActivationAttemptsLessThan(
+                userId, token, expirationAfter, activationAttempts
+        );
+    }
+
+    void deleteAllByExpirationBefore(@NotNull Instant instant);
+
+    Optional<ActivationToken> findByUserId(@NotNull UUID userId);
 }

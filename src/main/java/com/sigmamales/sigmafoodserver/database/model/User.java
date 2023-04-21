@@ -52,6 +52,9 @@ public class User implements UserDetails {
     @NotNull
     private Boolean enabled;
 
+    @OneToOne(mappedBy = "user")
+    private ActivationToken activationToken;
+
     public void updateWith(@NotNull UserRequest request) {
         name = request.getName();
         surname = request.getSurname();

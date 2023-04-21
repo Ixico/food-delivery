@@ -22,4 +22,6 @@ public interface UserRepository extends CommonRepository<User> {
 
     boolean existsByEmail(@NotBlank String email);
 
+    void deleteAllByEnabledIsFalseAndActivationTokenIsNull();
+
 }

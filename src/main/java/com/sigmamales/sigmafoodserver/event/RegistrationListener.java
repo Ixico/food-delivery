@@ -15,11 +15,13 @@ public class RegistrationListener {
 
     private final JavaMailSender javaMailSender;
 
+    private static final String APPLICATION_MAIL = "noreply@sigmafood.com";
+
     @EventListener
     @Async
     public void handleRegistrationEvent(RegistrationEvent registrationEvent) {
         var message = new SimpleMailMessage();
-        message.setFrom("noreply@sigmafood.com");
+        message.setFrom(APPLICATION_MAIL);
         message.setTo(registrationEvent.getEmail());
         message.setSubject("Activate your account!");
         message.setText(registrationEvent.getToken());

@@ -1,8 +1,6 @@
 package com.sigmamales.sigmafoodserver.database.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -24,12 +22,25 @@ public class ActivationToken {
     private UUID id;
 
     @NotNull
+    @Column(name = "user_id")
     private UUID userId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 
     @NotBlank
     private String token;
 
     @NotNull
     private Instant expiration;
+
+    @NotNull
+    private Integer activationAttempts;
+
+    public void incrementActivationAttempts() {
+        activationAttempts++;
+    }
 
 }

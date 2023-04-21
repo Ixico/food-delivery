@@ -10,11 +10,13 @@ import com.sigmamales.sigmafoodserver.database.repository.UserRepository;
 import com.sigmamales.sigmafoodserver.event.RegistrationEvent;
 import com.sigmamales.sigmafoodserver.exception.InvalidActivationToken;
 import com.sigmamales.sigmafoodserver.exception.UserAlreadyExistsException;
+import com.sigmamales.sigmafoodserver.properties.ApplicationProperties;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,8 @@ public class AccountService {
 
     private final ValidationService validationService;
 
+    private final ApplicationProperties applicationProperties;
+
 
     public UUID createAccount(CreateAccountRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -65,7 +69,8 @@ public class AccountService {
                 ActivationToken.builder()
                         .userId(userId)
                         .token(generateTokenValue())
-                        .expiration(Instant.now().plus(10, ChronoUnit.MINUTES))
+                        .expiration(Instant.now()
+                                .plus(applicationProperties.getActivationTokenExpirationMinutes(), ChronoUnit.MINUTES))
                         .build()
         ).getToken();
         applicationEventPublisher.publishEvent(
@@ -79,14 +84,25 @@ public class AccountService {
 
 
     public User activateAccount(ActivateAccountRequest request) {
-        var activationTokenExists = activationTokenRepository.existsByUserIdAndTokenAndExpirationAfter(
-                request.getAccountId(), request.getToken(), Instant.now());
+        var activationTokenExists = activationTokenRepository.tokenExists(
+                request.getAccountId(), request.getToken(), Instant.now(),
+                applicationProperties.getAccountActivationMaxAttempts()
+        );
         if (!activationTokenExists) {
+            activationTokenRepository.findByUserId(request.getAccountId()).ifPresent(
+                    ActivationToken::incrementActivationAttempts
+            );
             throw InvalidActivationToken.instance();
         }
         var user = userRepository.getById(request.getAccountId());
         user.setEnabled(true);
         return userRepository.save(user);
+    }
+
+    @Scheduled(fixedDelay = 1000 * 60)
+    public void accountRetention() {
+        activationTokenRepository.deleteAllByExpirationBefore(Instant.now());
+        userRepository.deleteAllByEnabledIsFalseAndActivationTokenIsNull();
     }
 
     private String generateTokenValue() {

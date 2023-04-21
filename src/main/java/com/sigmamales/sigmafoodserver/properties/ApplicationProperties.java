@@ -17,4 +17,10 @@ public class ApplicationProperties {
 
     @NotNull
     private Integer refreshTokenExpirationHours;
+
+    @NotNull
+    private Integer activationTokenExpirationMinutes;
+
+    @NotNull
+    private Integer accountActivationMaxAttempts;
 }
