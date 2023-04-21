@@ -18,9 +18,7 @@ spring:
 springdoc:
   api-docs:
     path: "/api-docs"
-authentication:
-  public-key: classpath:public.key
-  private-key: classpath:private.key
+application-properties:
   access-token-expiration-minutes: 5
   refresh-token-expiration-hours: 24
 logging:

@@ -1,7 +1,7 @@
 package com.sigmamales.sigmafoodserver.authentication;
 
-import com.sigmamales.sigmafoodserver.api.controller.AccountController;
-import com.sigmamales.sigmafoodserver.api.controller.TokenController;
+import com.sigmamales.sigmafoodserver.controller.AccountController;
+import com.sigmamales.sigmafoodserver.controller.TokenController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

@@ -2,8 +2,8 @@ package com.sigmamales.sigmafoodserver.database.repository;
 
 import com.sigmamales.sigmafoodserver.database.model.Address;
 import com.sigmamales.sigmafoodserver.database.repository.common.CommonRepository;
-import com.sigmamales.sigmafoodserver.exception.AddressNotFoundException;
 import com.sigmamales.sigmafoodserver.exception.common.ApiException;
+import com.sigmamales.sigmafoodserver.exception.notfound.AddressNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;

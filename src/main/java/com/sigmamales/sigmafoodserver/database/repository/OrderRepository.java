@@ -3,8 +3,8 @@ package com.sigmamales.sigmafoodserver.database.repository;
 import com.sigmamales.sigmafoodserver.database.model.Order;
 import com.sigmamales.sigmafoodserver.database.model.User;
 import com.sigmamales.sigmafoodserver.database.repository.common.CommonRepository;
-import com.sigmamales.sigmafoodserver.exception.OrderNotFoundException;
 import com.sigmamales.sigmafoodserver.exception.common.ApiException;
+import com.sigmamales.sigmafoodserver.exception.notfound.OrderNotFoundException;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

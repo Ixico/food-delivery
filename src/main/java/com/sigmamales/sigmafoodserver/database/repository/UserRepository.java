@@ -2,8 +2,8 @@ package com.sigmamales.sigmafoodserver.database.repository;
 
 import com.sigmamales.sigmafoodserver.database.model.User;
 import com.sigmamales.sigmafoodserver.database.repository.common.CommonRepository;
-import com.sigmamales.sigmafoodserver.exception.UserNotFoundException;
 import com.sigmamales.sigmafoodserver.exception.common.ApiException;
+import com.sigmamales.sigmafoodserver.exception.notfound.UserNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Repository;
 

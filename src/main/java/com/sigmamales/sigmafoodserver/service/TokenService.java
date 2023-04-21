@@ -2,7 +2,7 @@ package com.sigmamales.sigmafoodserver.service;
 
 import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
-import com.sigmamales.sigmafoodserver.properties.AuthenticationProperties;
+import com.sigmamales.sigmafoodserver.properties.ApplicationProperties;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class TokenService {
     @Qualifier("accessTokenEncoder")
     private final JwtEncoder accessTokenEncoder;
 
-    private final AuthenticationProperties properties;
+    private final ApplicationProperties properties;
 
 
     public TokenDto createTokens() {

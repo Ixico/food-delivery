@@ -1,4 +1,4 @@
-package com.sigmamales.sigmafoodserver.api.controller;
+package com.sigmamales.sigmafoodserver.controller;
 
 import com.sigmamales.sigmafoodserver.api.dto.UserDto;
 import com.sigmamales.sigmafoodserver.api.mapper.UserMapper;

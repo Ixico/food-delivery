@@ -6,20 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "authentication")
+@ConfigurationProperties(prefix = "application-properties")
 @Validated
-public class AuthenticationProperties {
-
-    @NotNull
-    private RSAPublicKey publicKey;
-
-    @NotNull
-    private RSAPrivateKey privateKey;
+public class ApplicationProperties {
 
     @NotNull
     private Integer accessTokenExpirationMinutes;

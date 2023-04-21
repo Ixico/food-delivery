@@ -1,7 +1,7 @@
 package com.sigmamales.sigmafoodserver.authentication;
 
 import com.sigmamales.sigmafoodserver.database.model.User;
-import com.sigmamales.sigmafoodserver.exception.UserNotFoundException;
+import com.sigmamales.sigmafoodserver.exception.notfound.UserNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
