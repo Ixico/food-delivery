@@ -2,19 +2,21 @@ package com.sigmamales.sigmafoodserver.service;
 
 import com.sigmamales.sigmafoodserver.api.dto.TokenDto;
 import com.sigmamales.sigmafoodserver.authentication.PrincipalContext;
+import com.sigmamales.sigmafoodserver.exception.InvalidJwtException;
+import com.sigmamales.sigmafoodserver.exception.TokenAlreadyRevokedException;
+import com.sigmamales.sigmafoodserver.exception.TokenJustCreatedException;
 import com.sigmamales.sigmafoodserver.properties.ApplicationProperties;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -36,10 +38,19 @@ public class TokenService {
     @Qualifier("accessTokenEncoder")
     private final JwtEncoder accessTokenEncoder;
 
+    @Qualifier("refreshTokenDecoder")
+    private final JwtDecoder refreshTokenDecoder;
+
     private final ApplicationProperties properties;
 
 
     public TokenDto createTokens() {
+        var currentToken = PrincipalContext.getCurrentToken();
+        currentToken.map(jwt -> jwt.getClaimAsInstant("iat")).ifPresent(issued -> {
+            if (Duration.between(issued, Instant.now()).toMinutes() < 1) {
+                throw TokenJustCreatedException.instance();
+            }
+        });
         var instantNow = Instant.now();
         var refreshTokenExpiration = instantNow.plus(properties.getRefreshTokenExpirationHours(), ChronoUnit.HOURS);
         var accessTokenExpiration = instantNow.plus(properties.getAccessTokenExpirationMinutes(), ChronoUnit.HOURS);
@@ -47,7 +58,7 @@ public class TokenService {
                 .refreshToken(refreshTokenEncoder.encode(buildParameters(instantNow, refreshTokenExpiration)).getTokenValue())
                 .accessToken(accessTokenEncoder.encode(buildParameters(instantNow, accessTokenExpiration)).getTokenValue())
                 .build();
-        PrincipalContext.getCurrentTokenValue().ifPresent(this::revokeToken);
+        currentToken.map(Jwt::getTokenValue).ifPresent(this::revokeToken);
         return tokens;
     }
 
@@ -66,7 +77,19 @@ public class TokenService {
     }
 
     public void revokeToken(String token) {
+        assertRefreshTokenValid(token);
+        if (revokedTokens.contains(token)) {
+            throw TokenAlreadyRevokedException.instance();
+        }
         revokedTokens.add(token);
     }
 
+    public void assertRefreshTokenValid(@NotBlank String token) {
+        try {
+            refreshTokenDecoder.decode(token);
+        } catch (Exception ex) {
+            log.error("Exception on decoding refresh token", ex);
+            throw InvalidJwtException.instance();
+        }
+    }
 }

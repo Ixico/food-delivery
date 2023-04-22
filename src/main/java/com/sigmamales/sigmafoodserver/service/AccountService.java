@@ -71,6 +71,7 @@ public class AccountService {
                         .token(generateTokenValue())
                         .expiration(Instant.now()
                                 .plus(applicationProperties.getActivationTokenExpirationMinutes(), ChronoUnit.MINUTES))
+                        .activationAttempts(0)
                         .build()
         ).getToken();
         applicationEventPublisher.publishEvent(

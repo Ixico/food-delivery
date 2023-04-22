@@ -22,10 +22,10 @@ public class PrincipalContext {
         throw UserNotFoundException.instance();
     }
 
-    public static Optional<String> getCurrentTokenValue() {
+    public static Optional<Jwt> getCurrentToken() {
         var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof Jwt) {
-            return Optional.of(((Jwt) principal).getTokenValue());
+            return Optional.of(((Jwt) principal));
         }
         return Optional.empty();
     }
