@@ -13,6 +13,8 @@ import java.util.Arrays;
 @Slf4j
 public class ApiExceptionHandler {
 
+    private static final String UNEXPECTED_ERROR_MESSAGE = "Please report the problem to sigmafoodcompany@gmail.com.";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Problem> handleConstraintViolationException(MethodArgumentNotValidException exception) {
         log.error("Constraint violation exception occurred", exception);
@@ -42,7 +44,7 @@ public class ApiExceptionHandler {
         log.error("Unexpected exception occurred", exception);
         var httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         var problem = Problem.builder()
-                .errorMessage(exception.getMessage())
+                .errorMessage(UNEXPECTED_ERROR_MESSAGE)
                 .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
                 .status(httpStatus.value())
                 .build();
