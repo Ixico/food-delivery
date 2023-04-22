@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class TokenService {
         });
         var instantNow = Instant.now();
         var refreshTokenExpiration = instantNow.plus(properties.getRefreshTokenExpirationHours(), ChronoUnit.HOURS);
-        var accessTokenExpiration = instantNow.plus(properties.getAccessTokenExpirationMinutes(), ChronoUnit.HOURS);
+        var accessTokenExpiration = instantNow.plus(properties.getAccessTokenExpirationMinutes(), ChronoUnit.MINUTES);
         var tokens = TokenDto.builder()
                 .refreshToken(refreshTokenEncoder.encode(buildParameters(instantNow, refreshTokenExpiration)).getTokenValue())
                 .accessToken(accessTokenEncoder.encode(buildParameters(instantNow, accessTokenExpiration)).getTokenValue())
@@ -87,9 +88,27 @@ public class TokenService {
     public void assertRefreshTokenValid(@NotBlank String token) {
         try {
             refreshTokenDecoder.decode(token);
-        } catch (Exception ex) {
-            log.error("Exception on decoding refresh token", ex);
+        } catch (Exception ignore) {
             throw InvalidJwtException.instance();
         }
+    }
+
+    @Scheduled(fixedDelay = 1000 * 60)
+    public void tokenRetention() {
+        log.info("Running token retention...");
+        var toDelete = new HashSet<String>();
+        revokedTokens.forEach(token -> {
+            try {
+                var jwt = refreshTokenDecoder.decode(token);
+                if (jwt.getClaimAsInstant("exp").isBefore(Instant.now())) {
+                    toDelete.add(token);
+                    log.debug("Removing token {}", token);
+                }
+            } catch (Exception ex) {
+                log.error("Exception on decoding token", ex);
+                toDelete.add(token);
+            }
+        });
+        revokedTokens.removeAll(toDelete);
     }
 }
