@@ -4,6 +4,7 @@ import com.sigmamales.sigmafoodserver.api.dto.ExportableOrders;
 import com.sigmamales.sigmafoodserver.api.dto.OrderDto;
 import com.sigmamales.sigmafoodserver.api.dto.OrderSummaryDto;
 import com.sigmamales.sigmafoodserver.api.mapper.OrderMapper;
+import com.sigmamales.sigmafoodserver.api.request.OrderProductRequest;
 import com.sigmamales.sigmafoodserver.api.request.OrderRequest;
 import com.sigmamales.sigmafoodserver.api.request.OrderSummaryRequest;
 import com.sigmamales.sigmafoodserver.database.model.Address;
@@ -15,6 +16,7 @@ import com.sigmamales.sigmafoodserver.database.repository.OrderProductRepository
 import com.sigmamales.sigmafoodserver.database.repository.OrderRepository;
 import com.sigmamales.sigmafoodserver.database.repository.ProductRepository;
 import com.sigmamales.sigmafoodserver.exception.ExportingOrdersException;
+import com.sigmamales.sigmafoodserver.exception.TooManyProductsException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -49,7 +51,10 @@ public class OrderService {
 
     private static final BigDecimal DELIVERY_COST = BigDecimal.TEN;
 
+    private static final Integer MAX_PRODUCTS_IN_ORDER = 20;
+
     public Order createOrder(@NotNull @Valid OrderRequest orderRequest, @NotNull User user) {
+        validateOrderRequest(orderRequest.getOrderProductRequests());
         var addressRequest = orderRequest.getAddressRequest();
         var address = addressRepository.save(
                 Address.builder()
@@ -86,6 +91,7 @@ public class OrderService {
     }
 
     public OrderSummaryDto orderSummary(@NotNull @Valid OrderSummaryRequest orderSummaryRequest) {
+        validateOrderRequest(orderSummaryRequest.getOrderProductRequests());
         var orderProducts = orderSummaryRequest.getOrderProductRequests().stream().map(request ->
                 OrderProduct.builder()
                         .product(productRepository.getById(request.getProductId()))
@@ -93,6 +99,13 @@ public class OrderService {
                         .build()
         ).collect(Collectors.toList());
         return summarizeOrder(orderProducts);
+    }
+
+    private void validateOrderRequest(@NotNull List<OrderProductRequest> orderProductRequests) {
+        var quantitySum = orderProductRequests.stream().map(OrderProductRequest::getQuantity).reduce(0, Integer::sum);
+        if (quantitySum > MAX_PRODUCTS_IN_ORDER) {
+            throw TooManyProductsException.instance();
+        }
     }
 
     private OrderSummaryDto summarizeOrder(@NotNull List<OrderProduct> orderProducts) {
@@ -114,7 +127,7 @@ public class OrderService {
             return stringWriter.toString();
         } catch (Exception ex) {
             log.error("Marshaling error", ex);
-            throw ExportingOrdersException.withReason(ex.getMessage());
+            throw ExportingOrdersException.instance();
         }
     }
 
