@@ -10,6 +10,7 @@ import org.hibernate.annotations.CascadeType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -55,11 +56,23 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private ActivationToken activationToken;
 
+    @NotNull
+    private Boolean locked;
+
+    @NotNull
+    private Integer loginAttempts;
+
+    private Instant lockTimestamp;
+
     public void updateWith(@NotNull UserRequest request) {
         name = request.getName();
         surname = request.getSurname();
         phoneNumber = request.getPhoneNumber();
         address.updateWith(request.getAddress());
+    }
+
+    public Integer incrementAndGetLoginAttempts() {
+        return ++loginAttempts;
     }
 
     @Override
@@ -84,7 +97,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !locked;
     }
 
     @Override

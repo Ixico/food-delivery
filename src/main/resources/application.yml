@@ -15,9 +15,15 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-springdoc:
-  api-docs:
-    path: "/api-docs"
+server:
+  port: 443
+  ssl:
+#    key-store-type: PKCS12
+#    key-store: classpath:sigma-food.p12
+    key-store: classpath:keystore.jks
+    key-store-password: 1qaz@WSX
+    key-alias: sigma-food
+    enabled: true
 application-properties:
   access-token-expiration-minutes: 5
   refresh-token-expiration-hours: 24

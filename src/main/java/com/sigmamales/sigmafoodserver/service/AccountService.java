@@ -63,6 +63,9 @@ public class AccountService {
                         .phoneNumber(userData.getPhoneNumber())
                         .address(address)
                         .enabled(false)
+                        .locked(false)
+                        .loginAttempts(0)
+                        .lockTimestamp(null)
                         .build()
         ).getId();
         var tokenValue = activationTokenRepository.save(

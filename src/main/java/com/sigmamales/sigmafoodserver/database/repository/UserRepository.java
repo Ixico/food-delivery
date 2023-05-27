@@ -5,8 +5,11 @@ import com.sigmamales.sigmafoodserver.database.repository.common.CommonRepositor
 import com.sigmamales.sigmafoodserver.exception.common.ApiException;
 import com.sigmamales.sigmafoodserver.exception.notfound.UserNotFoundException;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,5 +26,7 @@ public interface UserRepository extends CommonRepository<User> {
     boolean existsByEmail(@NotBlank String email);
 
     void deleteAllByEnabledIsFalseAndActivationTokenIsNull();
+
+    List<User> findAllByLockedAndLockTimestampBefore(@NotNull Boolean locked, @NotNull Instant before);
 
 }
